@@ -1,0 +1,103 @@
+From 2617c39ef3be43e477bea2d47d95e2540e000029 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B6ren=20Tempel?= <soeren+git@soeren-tempel.net>
+Date: Fri, 28 May 2021 11:26:01 +0200
+Subject: [PATCH] Don't use the internal glibc header sys/cdefs.h
+
+https://wiki.musl-libc.org/faq.html#Q:-When-compiling-something-against-musl,-I-get-error-messages-about
+---
+ pairing_auth/include/adb/pairing/pairing_auth.h          | 9 ++++++---
+ .../include/adb/pairing/pairing_connection.h             | 9 ++++++---
+ pairing_connection/include/adb/pairing/pairing_server.h  | 9 ++++++---
+ 3 files changed, 18 insertions(+), 9 deletions(-)
+
+diff --git a/pairing_auth/include/adb/pairing/pairing_auth.h b/pairing_auth/include/adb/pairing/pairing_auth.h
+index ee0412fb..83f40a9f 100644
+--- a/pairing_auth/include/adb/pairing/pairing_auth.h
++++ b/pairing_auth/include/adb/pairing/pairing_auth.h
+@@ -18,13 +18,14 @@
+ 
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #if !defined(__INTRODUCED_IN)
+ #define __INTRODUCED_IN(__api_level) /* nothing */
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * PairingAuthCtx is a wrapper around the SPAKE2 protocol + cipher initialization
+@@ -181,4 +182,6 @@ size_t pairing_auth_safe_decrypted_size(PairingAuthCtx* ctx, const uint8_t* buf,
+ bool pairing_auth_decrypt(PairingAuthCtx* ctx, const uint8_t* inbuf, size_t inlen, uint8_t* outbuf,
+                           size_t* outlen) __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/pairing_connection/include/adb/pairing/pairing_connection.h b/pairing_connection/include/adb/pairing/pairing_connection.h
+index 98764171..8e63db7b 100644
+--- a/pairing_connection/include/adb/pairing/pairing_connection.h
++++ b/pairing_connection/include/adb/pairing/pairing_connection.h
+@@ -18,7 +18,6 @@
+ 
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #if !defined(__INTRODUCED_IN)
+ #define __INTRODUCED_IN(__api_level) /* nothing */
+@@ -35,7 +34,9 @@
+ //
+ // If both sides have authenticated, they will exchange their peer information
+ // (see #PeerInfo).
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ const uint32_t kMaxPeerInfoSize = 8192;
+ struct PeerInfo {
+@@ -125,4 +126,6 @@ PairingConnectionCtx* pairing_connection_server_new(const uint8_t* pswd, size_t
+ // @param ctx the PairingConnectionCtx instance to destroy. Will abort if null.
+ void pairing_connection_destroy(PairingConnectionCtx* ctx) __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/pairing_connection/include/adb/pairing/pairing_server.h b/pairing_connection/include/adb/pairing/pairing_server.h
+index 9e7b69fc..babff948 100644
+--- a/pairing_connection/include/adb/pairing/pairing_server.h
++++ b/pairing_connection/include/adb/pairing/pairing_server.h
+@@ -18,7 +18,6 @@
+ 
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <functional>
+ #include <memory>
+@@ -31,7 +30,9 @@
+ #define __INTRODUCED_IN(__api_level) /* nothing */
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // PairingServerCtx is a wrapper around the #PairingConnectionCtx APIs,
+ // which handles multiple client connections.
+@@ -106,4 +107,6 @@ PairingServerCtx* pairing_server_new_no_cert(const uint8_t* pswd, size_t pswd_le
+ // @param ctx the PairingServerCtx instance to destroy.
+ void pairing_server_destroy(PairingServerCtx* ctx) __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif

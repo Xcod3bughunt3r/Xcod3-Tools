@@ -1,0 +1,76 @@
+From 9a9820a2a80277bfb49721c149202285fcb3500d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B6ren=20Tempel?= <soeren+git@soeren-tempel.net>
+Date: Sat, 16 Oct 2021 01:14:17 +0200
+Subject: [PATCH] Don't use the internal glibc header sys/cdefs.h
+
+for file in $(ag -l __BEGIN_DECLS); do
+	sed -i "${file}" \
+		-e 's/__BEGIN_DECLS/#ifdef __cplusplus\nextern "C" {\n#endif/g' \
+		-e 's/__END_DECLS/#ifdef __cplusplus\n}\n#endif/g' \
+		-e '/#include <sys\/cdefs.h>/d'
+done
+
+https://wiki.musl-libc.org/faq.html#Q:-When-compiling-something-against-musl,-I-get-error-messages-about
+---
+ .../include/android/file_descriptor_jni.h                | 9 ++++++---
+ tests/lib/testUtil/include/testUtil.h                    | 8 ++++++--
+ 2 files changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/module_ndk_libs/libnativehelper/include/android/file_descriptor_jni.h b/module_ndk_libs/libnativehelper/include/android/file_descriptor_jni.h
+index 26529b99..083999d5 100644
+--- a/module_ndk_libs/libnativehelper/include/android/file_descriptor_jni.h
++++ b/module_ndk_libs/libnativehelper/include/android/file_descriptor_jni.h
+@@ -25,7 +25,6 @@
+ 
+ #pragma once
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <jni.h>
+ 
+@@ -33,7 +32,9 @@
+ #define __INTRODUCED_IN(x)
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Returns a new java.io.FileDescriptor.
+@@ -83,6 +84,8 @@ int AFileDescriptor_getFd(JNIEnv* env, jobject fileDescriptor) __INTRODUCED_IN(3
+  */
+ void AFileDescriptor_setFd(JNIEnv* env, jobject fileDescriptor, int fd) __INTRODUCED_IN(31);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/tests/lib/testUtil/include/testUtil.h b/tests/lib/testUtil/include/testUtil.h
+index 3b75914d..bdef437d 100644
+--- a/tests/lib/testUtil/include/testUtil.h
++++ b/tests/lib/testUtil/include/testUtil.h
+@@ -22,7 +22,9 @@
+ #include <stdio.h>
+ #include <sys/time.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Time Utilities
+ struct timespec double2ts(double amt);
+@@ -64,6 +66,8 @@ uint64_t testXDumpGetOffset(void);
+ // Command Execution
+ void testExecCmd(const char *cmd);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif

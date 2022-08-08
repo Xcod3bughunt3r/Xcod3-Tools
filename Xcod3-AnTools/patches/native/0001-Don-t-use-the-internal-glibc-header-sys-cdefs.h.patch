@@ -1,0 +1,1533 @@
+From a1fdf4143c97c562944071d0626baf5234d0c24c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B6ren=20Tempel?= <soeren+git@soeren-tempel.net>
+Date: Sat, 16 Oct 2021 03:09:54 +0200
+Subject: [PATCH] Don't use the internal glibc header sys/cdefs.h
+
+for file in $(ag -l '__BEGIN_DECLS|sys/cdefs.h'); do
+	sed -i "${file}" \
+		-e 's/__BEGIN_DECLS/#ifdef __cplusplus\nextern "C" {\n#endif/g' \
+		-e 's/__END_DECLS/#ifdef __cplusplus\n}\n#endif/g' \
+		-e '/#include <sys\/cdefs.h>/d'
+done
+
+https://wiki.musl-libc.org/faq.html#Q:-When-compiling-something-against-musl,-I-get-error-messages-about-%3Ccode%3Esys/cdefs.h%3C/code%3E
+---
+ docs/Doxyfile                                            | 8 ++++++--
+ include/android/asset_manager.h                          | 1 -
+ include/android/choreographer.h                          | 9 ++++++---
+ include/android/configuration.h                          | 1 -
+ include/android/font.h                                   | 9 ++++++---
+ include/android/font_matcher.h                           | 9 ++++++---
+ include/android/hardware_buffer_jni.h                    | 9 ++++++---
+ include/android/input.h                                  | 1 -
+ include/android/multinetwork.h                           | 9 ++++++---
+ include/android/native_window_jni.h                      | 1 -
+ include/android/sharedmem.h                              | 1 -
+ include/android/sharedmem_jni.h                          | 1 -
+ include/android/surface_control.h                        | 9 ++++++---
+ include/android/surface_texture.h                        | 9 ++++++---
+ include/android/surface_texture_jni.h                    | 8 ++++++--
+ include/android/system_fonts.h                           | 9 ++++++---
+ include/android/thermal.h                                | 1 -
+ include/android/trace.h                                  | 1 -
+ include/diskusage/dirsize.h                              | 8 ++++++--
+ libs/adbd_auth/include/adbd_auth.h                       | 9 ++++++---
+ libs/binder/ndk/include_ndk/android/binder_ibinder.h     | 9 ++++++---
+ libs/binder/ndk/include_ndk/android/binder_ibinder_jni.h | 8 ++++++--
+ libs/binder/ndk/include_ndk/android/binder_parcel.h      | 9 ++++++---
+ libs/binder/ndk/include_ndk/android/binder_parcel_jni.h  | 8 ++++++--
+ libs/binder/ndk/include_ndk/android/binder_status.h      | 9 ++++++---
+ .../include_platform/android/binder_ibinder_platform.h   | 8 ++++++--
+ .../binder/ndk/include_platform/android/binder_manager.h | 9 ++++++---
+ .../include_platform/android/binder_parcel_platform.h    | 8 ++++++--
+ .../binder/ndk/include_platform/android/binder_process.h | 9 ++++++---
+ libs/binder/ndk/include_platform/android/binder_shell.h  | 8 ++++++--
+ .../ndk/include_platform/android/binder_stability.h      | 8 ++++++--
+ libs/binder/ndk/parcel_internal.h                        | 1 -
+ libs/nativebase/include/nativebase/nativebase.h          | 9 ++++++---
+ libs/nativedisplay/include/apex/choreographer.h          | 8 ++++++--
+ libs/nativedisplay/include/apex/display.h                | 8 ++++++--
+ .../nativedisplay/include/surfacetexture/ImageConsumer.h | 1 -
+ .../include/surfacetexture/SurfaceTexture.h              | 1 -
+ libs/nativewindow/include/android/data_space.h           | 9 ++++++---
+ libs/nativewindow/include/android/hardware_buffer.h      | 9 ++++++---
+ libs/nativewindow/include/android/hdr_metadata.h         | 9 ++++++---
+ libs/nativewindow/include/android/native_window.h        | 1 -
+ libs/nativewindow/include/apex/window.h                  | 8 ++++++--
+ libs/nativewindow/include/system/window.h                | 9 ++++++---
+ libs/nativewindow/include/vndk/hardware_buffer.h         | 8 ++++++--
+ libs/nativewindow/include/vndk/window.h                  | 8 ++++++--
+ libs/vr/libdvr/dvr_buffer_queue_internal.h               | 1 -
+ libs/vr/libdvr/dvr_internal.h                            | 1 -
+ libs/vr/libdvr/include/dvr/dvr_buffer.h                  | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_buffer_queue.h            | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_config.h                  | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_configuration_data.h      | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_deleter.h                 | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_display_manager.h         | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_display_types.h           | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_performance.h             | 8 ++++++--
+ libs/vr/libdvr/include/dvr/dvr_pose.h                    | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_surface.h                 | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_tracking.h                | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_tracking_types.h          | 9 ++++++---
+ libs/vr/libdvr/include/dvr/dvr_vsync.h                   | 9 ++++++---
+ vulkan/include/hardware/hwvulkan.h                       | 8 ++++++--
+ 61 files changed, 282 insertions(+), 139 deletions(-)
+
+diff --git a/docs/Doxyfile b/docs/Doxyfile
+index a1bd960c5a..60728c27f3 100644
+--- a/docs/Doxyfile
++++ b/docs/Doxyfile
+@@ -1623,8 +1623,12 @@ INCLUDE_FILE_PATTERNS  =
+ 
+ PREDEFINED             = \
+     "__ANDROID_API__=10000" \
+-    "__BEGIN_DECLS=" \
+-    "__END_DECLS=" \
++    "#ifdef __cplusplus
++extern "C" {
++#endif=" \
++    "#ifdef __cplusplus
++}
++#endif=" \
+     "__INTRODUCED_IN(x)=" \
+     "__INTRODUCED_IN_32(x)=" \
+     "__INTRODUCED_IN_64(x)=" \
+diff --git a/include/android/asset_manager.h b/include/android/asset_manager.h
+index 2ac7d4d350..8a7517e4a0 100644
+--- a/include/android/asset_manager.h
++++ b/include/android/asset_manager.h
+@@ -26,7 +26,6 @@
+ #ifndef ANDROID_ASSET_MANAGER_H
+ #define ANDROID_ASSET_MANAGER_H
+ 
+-#include <sys/cdefs.h>
+ #include <sys/types.h>
+ 
+ #ifdef __cplusplus
+diff --git a/include/android/choreographer.h b/include/android/choreographer.h
+index 8039bb0d79..3e15dfb99c 100644
+--- a/include/android/choreographer.h
++++ b/include/android/choreographer.h
+@@ -27,9 +27,10 @@
+ #define ANDROID_CHOREOGRAPHER_H
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct AChoreographer;
+ typedef struct AChoreographer AChoreographer;
+@@ -151,7 +152,9 @@ void AChoreographer_unregisterRefreshRateCallback(AChoreographer* choreographer,
+                                                   AChoreographer_refreshRateCallback, void* data)
+         __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_CHOREOGRAPHER_H
+ 
+diff --git a/include/android/configuration.h b/include/android/configuration.h
+index 88019ae054..dd28fa8b01 100644
+--- a/include/android/configuration.h
++++ b/include/android/configuration.h
+@@ -26,7 +26,6 @@
+ #ifndef ANDROID_CONFIGURATION_H
+ #define ANDROID_CONFIGURATION_H
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <android/asset_manager.h>
+ 
+diff --git a/include/android/font.h b/include/android/font.h
+index a172618829..47fe58a887 100644
+--- a/include/android/font.h
++++ b/include/android/font.h
+@@ -31,7 +31,6 @@
+ 
+ #include <stdbool.h>
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ /******************************************************************
+  *
+@@ -49,7 +48,9 @@
+  *   - DO NOT CHANGE THE LAYOUT OR SIZE OF STRUCTURES
+  */
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ enum {
+     /** The minimum value fot the font weight value. */
+@@ -295,7 +296,9 @@ uint32_t AFont_getAxisTag(const AFont* _Nonnull font, uint32_t axisIndex)
+ float AFont_getAxisValue(const AFont* _Nonnull font, uint32_t axisIndex)
+       __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_FONT_H
+ 
+diff --git a/include/android/font_matcher.h b/include/android/font_matcher.h
+index 49e478c2f3..dbba01f514 100644
+--- a/include/android/font_matcher.h
++++ b/include/android/font_matcher.h
+@@ -75,7 +75,6 @@
+ 
+ #include <stdbool.h>
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/font.h>
+ 
+@@ -95,7 +94,9 @@
+  *   - DO NOT CHANGE THE LAYOUT OR SIZE OF STRUCTURES
+  */
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ enum {
+     /** A family variant value for the system default variant. */
+@@ -215,7 +216,9 @@ AFont* _Nonnull AFontMatcher_match(
+         const uint32_t textLength,
+         uint32_t* _Nullable runLengthOut) __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_FONT_MATCHER_H
+ 
+diff --git a/include/android/hardware_buffer_jni.h b/include/android/hardware_buffer_jni.h
+index ae208a6e75..7975fd4545 100644
+--- a/include/android/hardware_buffer_jni.h
++++ b/include/android/hardware_buffer_jni.h
+@@ -27,13 +27,14 @@
+ #ifndef ANDROID_HARDWARE_BUFFER_JNI_H
+ #define ANDROID_HARDWARE_BUFFER_JNI_H
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <android/hardware_buffer.h>
+ 
+ #include <jni.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Return the AHardwareBuffer wrapped by a Java HardwareBuffer object.
+@@ -68,7 +69,9 @@ AHardwareBuffer* AHardwareBuffer_fromHardwareBuffer(JNIEnv* env,
+ jobject AHardwareBuffer_toHardwareBuffer(JNIEnv* env,
+         AHardwareBuffer* hardwareBuffer) __INTRODUCED_IN(26);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_HARDWARE_BUFFER_JNI_H
+ 
+diff --git a/include/android/input.h b/include/android/input.h
+index dbfd61eb05..150bf06146 100644
+--- a/include/android/input.h
++++ b/include/android/input.h
+@@ -26,7 +26,6 @@
+ #ifndef _ANDROID_INPUT_H
+ #define _ANDROID_INPUT_H
+ 
+-#include <sys/cdefs.h>
+ 
+ /******************************************************************
+  *
+diff --git a/include/android/multinetwork.h b/include/android/multinetwork.h
+index 509ee0e49b..6c8d8fc71a 100644
+--- a/include/android/multinetwork.h
++++ b/include/android/multinetwork.h
+@@ -28,9 +28,10 @@
+ 
+ #include <netdb.h>
+ #include <stdlib.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * The corresponding C type for android.net.Network#getNetworkHandle() return
+@@ -216,7 +217,9 @@ int android_res_nresult(int fd,
+  */
+ void android_res_cancel(int nsend_fd) __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_MULTINETWORK_H
+ 
+diff --git a/include/android/native_window_jni.h b/include/android/native_window_jni.h
+index 071ec798b4..38e5cc6f97 100644
+--- a/include/android/native_window_jni.h
++++ b/include/android/native_window_jni.h
+@@ -26,7 +26,6 @@
+ #ifndef ANDROID_NATIVE_WINDOW_JNI_H
+ #define ANDROID_NATIVE_WINDOW_JNI_H
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <android/native_window.h>
+ 
+diff --git a/include/android/sharedmem.h b/include/android/sharedmem.h
+index 7994aa9914..253f2f7349 100644
+--- a/include/android/sharedmem.h
++++ b/include/android/sharedmem.h
+@@ -28,7 +28,6 @@
+ #define ANDROID_SHARED_MEMORY_H
+ 
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ /******************************************************************
+  *
+diff --git a/include/android/sharedmem_jni.h b/include/android/sharedmem_jni.h
+index bbac785a33..5abc245083 100644
+--- a/include/android/sharedmem_jni.h
++++ b/include/android/sharedmem_jni.h
+@@ -30,7 +30,6 @@
+ #include <jni.h>
+ #include <android/sharedmem.h>
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ /******************************************************************
+  *
+diff --git a/include/android/surface_control.h b/include/android/surface_control.h
+index 27b880d2e1..fe448c432d 100644
+--- a/include/android/surface_control.h
++++ b/include/android/surface_control.h
+@@ -26,14 +26,15 @@
+ #ifndef ANDROID_SURFACE_CONTROL_H
+ #define ANDROID_SURFACE_CONTROL_H
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <android/data_space.h>
+ #include <android/hardware_buffer.h>
+ #include <android/hdr_metadata.h>
+ #include <android/native_window.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct ASurfaceControl;
+ 
+@@ -429,6 +430,8 @@ void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* transaction,
+                                       ASurfaceControl* surface_control, float frameRate,
+                                       int8_t compatibility) __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_SURFACE_CONTROL_H
+diff --git a/include/android/surface_texture.h b/include/android/surface_texture.h
+index b227b324f8..470ca3fa29 100644
+--- a/include/android/surface_texture.h
++++ b/include/android/surface_texture.h
+@@ -43,11 +43,12 @@
+  */
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/native_window.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct ASurfaceTexture;
+ 
+@@ -173,6 +174,8 @@ void ASurfaceTexture_getTransformMatrix(ASurfaceTexture* st, float mtx[16]) __IN
+  */
+ int64_t ASurfaceTexture_getTimestamp(ASurfaceTexture* st) __INTRODUCED_IN(28);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* ANDROID_NATIVE_SURFACE_TEXTURE_H */
+diff --git a/include/android/surface_texture_jni.h b/include/android/surface_texture_jni.h
+index e40686d96c..0ceaaac36f 100644
+--- a/include/android/surface_texture_jni.h
++++ b/include/android/surface_texture_jni.h
+@@ -30,7 +30,9 @@
+ 
+ #include <jni.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Get a reference to the native ASurfaceTexture from the corresponding java object.
+@@ -50,6 +52,8 @@ __BEGIN_DECLS
+  */
+ ASurfaceTexture* ASurfaceTexture_fromSurfaceTexture(JNIEnv* env, jobject surfacetexture) __INTRODUCED_IN(28);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* ANDROID_NATIVE_SURFACE_TEXTURE_JNI_H */
+diff --git a/include/android/system_fonts.h b/include/android/system_fonts.h
+index b0bbb954a9..2b43ff4083 100644
+--- a/include/android/system_fonts.h
++++ b/include/android/system_fonts.h
+@@ -65,7 +65,6 @@
+ 
+ #include <stdbool.h>
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/font.h>
+ 
+@@ -85,7 +84,9 @@
+  *   - DO NOT CHANGE THE LAYOUT OR SIZE OF STRUCTURES
+  */
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * ASystemFontIterator provides access to the system font configuration.
+@@ -126,7 +127,9 @@ void ASystemFontIterator_close(ASystemFontIterator* _Nullable iterator) __INTROD
+  */
+ AFont* _Nullable ASystemFontIterator_next(ASystemFontIterator* _Nonnull iterator) __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_SYSTEM_FONTS_H
+ 
+diff --git a/include/android/thermal.h b/include/android/thermal.h
+index 6ec68d99fc..279fc719ef 100644
+--- a/include/android/thermal.h
++++ b/include/android/thermal.h
+@@ -26,7 +26,6 @@
+ #ifndef _ANDROID_THERMAL_H
+ #define _ANDROID_THERMAL_H
+ 
+-#include <sys/cdefs.h>
+ 
+ /******************************************************************
+  *
+diff --git a/include/android/trace.h b/include/android/trace.h
+index dcefffb20d..d69106dcd4 100644
+--- a/include/android/trace.h
++++ b/include/android/trace.h
+@@ -34,7 +34,6 @@
+ 
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/include/diskusage/dirsize.h b/include/diskusage/dirsize.h
+index 34236c0e6f..8500bd1a81 100644
+--- a/include/diskusage/dirsize.h
++++ b/include/diskusage/dirsize.h
+@@ -20,11 +20,15 @@
+ 
+ #include <stdint.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ int64_t stat_size(struct stat *s);
+ int64_t calculate_dir_size(int dfd);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __LIBDISKUSAGE_DIRSIZE_H */
+diff --git a/libs/adbd_auth/include/adbd_auth.h b/libs/adbd_auth/include/adbd_auth.h
+index 1dcf540cf3..f5221c2fa7 100644
+--- a/libs/adbd_auth/include/adbd_auth.h
++++ b/libs/adbd_auth/include/adbd_auth.h
+@@ -18,14 +18,15 @@
+ 
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ #include <sys/types.h>
+ 
+ #if !defined(__INTRODUCED_IN)
+ #define __INTRODUCED_IN(__api_level) /* nothing */
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // The transport type of the device connection.
+ enum AdbTransportType : int32_t {
+@@ -185,4 +186,6 @@ enum AdbdAuthFeature : int32_t {
+  */
+ bool adbd_auth_supports_feature(AdbdAuthFeature feature);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_ndk/android/binder_ibinder.h b/libs/binder/ndk/include_ndk/android/binder_ibinder.h
+index 78f2d3af14..4d72cd37f0 100644
+--- a/libs/binder/ndk/include_ndk/android/binder_ibinder.h
++++ b/libs/binder/ndk/include_ndk/android/binder_ibinder.h
+@@ -28,13 +28,14 @@
+ 
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ #include <sys/types.h>
+ 
+ #include <android/binder_parcel.h>
+ #include <android/binder_status.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Flags for AIBinder_transact.
+@@ -729,6 +730,8 @@ AIBinder_Weak* AIBinder_Weak_clone(const AIBinder_Weak* weak) __INTRODUCED_IN(31
+  */
+ bool AIBinder_Weak_lt(const AIBinder_Weak* lhs, const AIBinder_Weak* rhs) __INTRODUCED_IN(31);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/libs/binder/ndk/include_ndk/android/binder_ibinder_jni.h b/libs/binder/ndk/include_ndk/android/binder_ibinder_jni.h
+index 6880d86e1a..1e35082649 100644
+--- a/libs/binder/ndk/include_ndk/android/binder_ibinder_jni.h
++++ b/libs/binder/ndk/include_ndk/android/binder_ibinder_jni.h
+@@ -30,7 +30,9 @@
+ 
+ #include <jni.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Converts an android.os.IBinder object into an AIBinder* object.
+@@ -66,6 +68,8 @@ __attribute__((warn_unused_result)) AIBinder* AIBinder_fromJavaBinder(JNIEnv* en
+ __attribute__((warn_unused_result)) jobject AIBinder_toJavaBinder(JNIEnv* env, AIBinder* binder)
+         __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/libs/binder/ndk/include_ndk/android/binder_parcel.h b/libs/binder/ndk/include_ndk/android/binder_parcel.h
+index 527b151457..a32eeca9ee 100644
+--- a/libs/binder/ndk/include_ndk/android/binder_parcel.h
++++ b/libs/binder/ndk/include_ndk/android/binder_parcel.h
+@@ -28,14 +28,15 @@
+ 
+ #include <stdbool.h>
+ #include <stddef.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/binder_status.h>
+ 
+ struct AIBinder;
+ typedef struct AIBinder AIBinder;
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * This object represents a package of data that can be sent between processes. When transacting, an
+@@ -1163,6 +1164,8 @@ binder_status_t AParcel_appendFrom(const AParcel* from, AParcel* to, int32_t sta
+  * \return A parcel which is not related to any IBinder objects.
+  */
+ AParcel* AParcel_create() __INTRODUCED_IN(31);
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/libs/binder/ndk/include_ndk/android/binder_parcel_jni.h b/libs/binder/ndk/include_ndk/android/binder_parcel_jni.h
+index 384d4f7772..e4d22d1d81 100644
+--- a/libs/binder/ndk/include_ndk/android/binder_parcel_jni.h
++++ b/libs/binder/ndk/include_ndk/android/binder_parcel_jni.h
+@@ -30,7 +30,9 @@
+ 
+ #include <jni.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Converts an android.os.Parcel object into an AParcel* object.
+@@ -49,6 +51,8 @@ __BEGIN_DECLS
+ __attribute__((warn_unused_result)) AParcel* AParcel_fromJavaParcel(JNIEnv* env, jobject parcel)
+         __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/libs/binder/ndk/include_ndk/android/binder_status.h b/libs/binder/ndk/include_ndk/android/binder_status.h
+index 6f1fdfcd20..959d6be7e4 100644
+--- a/libs/binder/ndk/include_ndk/android/binder_status.h
++++ b/libs/binder/ndk/include_ndk/android/binder_status.h
+@@ -28,9 +28,10 @@
+ #include <errno.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #ifndef __ANDROID_API__
+ #error Android builds must be compiled against a specific API. If this is an \
+@@ -289,6 +290,8 @@ void AStatus_deleteDescription(const char* description) __INTRODUCED_IN(30);
+  */
+ void AStatus_delete(AStatus* status) __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /** @} */
+diff --git a/libs/binder/ndk/include_platform/android/binder_ibinder_platform.h b/libs/binder/ndk/include_platform/android/binder_ibinder_platform.h
+index e315c798ee..1546d74fe7 100644
+--- a/libs/binder/ndk/include_platform/android/binder_ibinder_platform.h
++++ b/libs/binder/ndk/include_platform/android/binder_ibinder_platform.h
+@@ -18,7 +18,9 @@
+ 
+ #include <android/binder_ibinder.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // platform values for binder_flags_t
+ enum {
+@@ -55,4 +57,6 @@ __attribute__((weak)) void AIBinder_setRequestingSid(AIBinder* binder, bool requ
+  */
+ __attribute__((weak, warn_unused_result)) const char* AIBinder_getCallingSid() __INTRODUCED_IN(31);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_platform/android/binder_manager.h b/libs/binder/ndk/include_platform/android/binder_manager.h
+index 2a66941cef..fac80c0185 100644
+--- a/libs/binder/ndk/include_platform/android/binder_manager.h
++++ b/libs/binder/ndk/include_platform/android/binder_manager.h
+@@ -18,9 +18,10 @@
+ 
+ #include <android/binder_ibinder.h>
+ #include <android/binder_status.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * This registers the service with the default service manager under this instance name. This does
+@@ -186,4 +187,6 @@ bool AServiceManager_tryUnregister() __INTRODUCED_IN(31);
+  */
+ void AServiceManager_reRegister() __INTRODUCED_IN(31);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_platform/android/binder_parcel_platform.h b/libs/binder/ndk/include_platform/android/binder_parcel_platform.h
+index b24094ef16..cb6b7d88d9 100644
+--- a/libs/binder/ndk/include_platform/android/binder_parcel_platform.h
++++ b/libs/binder/ndk/include_platform/android/binder_parcel_platform.h
+@@ -18,7 +18,9 @@
+ 
+ #include <android/binder_parcel.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #if !defined(__ANDROID_APEX__) && !defined(__ANDROID_VNDK__)
+ 
+@@ -44,4 +46,6 @@ bool AParcel_getAllowFds(const AParcel*);
+  */
+ void AParcel_markSensitive(const AParcel* parcel);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_platform/android/binder_process.h b/libs/binder/ndk/include_platform/android/binder_process.h
+index f408fadee0..985afca785 100644
+--- a/libs/binder/ndk/include_platform/android/binder_process.h
++++ b/libs/binder/ndk/include_platform/android/binder_process.h
+@@ -17,11 +17,12 @@
+ #pragma once
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/binder_status.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * This creates a threadpool for incoming binder transactions if it has not already been created.
+@@ -65,4 +66,6 @@ __attribute__((weak)) binder_status_t ABinderProcess_setupPolling(int* fd) __INT
+  */
+ __attribute__((weak)) binder_status_t ABinderProcess_handlePolledCommands() __INTRODUCED_IN(31);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_platform/android/binder_shell.h b/libs/binder/ndk/include_platform/android/binder_shell.h
+index 07d89e67fc..5da5a7f1cd 100644
+--- a/libs/binder/ndk/include_platform/android/binder_shell.h
++++ b/libs/binder/ndk/include_platform/android/binder_shell.h
+@@ -18,7 +18,9 @@
+ 
+ #include <android/binder_ibinder.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Function to execute a shell command.
+@@ -51,4 +53,6 @@ typedef binder_status_t (*AIBinder_handleShellCommand)(AIBinder* binder, int in,
+ __attribute__((weak)) void AIBinder_Class_setHandleShellCommand(
+         AIBinder_Class* clazz, AIBinder_handleShellCommand handleShellCommand) __INTRODUCED_IN(30);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/include_platform/android/binder_stability.h b/libs/binder/ndk/include_platform/android/binder_stability.h
+index f113ba8f21..1203bd7d4d 100644
+--- a/libs/binder/ndk/include_platform/android/binder_stability.h
++++ b/libs/binder/ndk/include_platform/android/binder_stability.h
+@@ -18,7 +18,9 @@
+ 
+ #include <android/binder_ibinder.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Private addition to binder_flag_t.
+@@ -99,4 +101,6 @@ static inline void AIBinder_forceDowngradeToLocalStability(AIBinder* binder) {
+  */
+ void AIBinder_markVintfStability(AIBinder* binder);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/binder/ndk/parcel_internal.h b/libs/binder/ndk/parcel_internal.h
+index b4f6358841..98d3c8f590 100644
+--- a/libs/binder/ndk/parcel_internal.h
++++ b/libs/binder/ndk/parcel_internal.h
+@@ -18,7 +18,6 @@
+ 
+ #include <android/binder_parcel.h>
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <binder/Parcel.h>
+ #include "ibinder_internal.h"
+diff --git a/libs/nativebase/include/nativebase/nativebase.h b/libs/nativebase/include/nativebase/nativebase.h
+index 7ecdfbd745..3979b1bb9f 100644
+--- a/libs/nativebase/include/nativebase/nativebase.h
++++ b/libs/nativebase/include/nativebase/nativebase.h
+@@ -19,11 +19,12 @@
+ #include <stdint.h>
+ #include <stdbool.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
+ #include <system/graphics-base.h>
+ #include <cutils/native_handle.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #ifdef __cplusplus
+ #define ANDROID_NATIVE_UNSIGNED_CAST(x) static_cast<unsigned int>(x)
+@@ -107,4 +108,6 @@ typedef struct ANativeWindowBuffer ANativeWindowBuffer;
+ // Old typedef for backwards compatibility.
+ typedef ANativeWindowBuffer_t android_native_buffer_t;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/nativedisplay/include/apex/choreographer.h b/libs/nativedisplay/include/apex/choreographer.h
+index 683abc4142..cee6059214 100644
+--- a/libs/nativedisplay/include/apex/choreographer.h
++++ b/libs/nativedisplay/include/apex/choreographer.h
+@@ -19,7 +19,9 @@
+ #include <android/choreographer.h>
+ #include <inttypes.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Creates an instance of AChoreographer.
+@@ -56,4 +58,6 @@ int AChoreographer_getFd(const AChoreographer* choreographer);
+  */
+ void AChoreographer_handlePendingEvents(AChoreographer* choreographer, void* data);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/nativedisplay/include/apex/display.h b/libs/nativedisplay/include/apex/display.h
+index a7eaf87b9e..4f1a0ad9e3 100644
+--- a/libs/nativedisplay/include/apex/display.h
++++ b/libs/nativedisplay/include/apex/display.h
+@@ -23,7 +23,9 @@
+ // TODO: the intention of these apis is to be stable - hence they are defined in
+ // an apex directory. But because they don't yet need to be stable, hold off on
+ // making them stable until a Mainline module needs them.
+-// __BEGIN_DECLS
++// #ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ namespace android {
+ 
+@@ -136,4 +138,6 @@ int64_t ADisplayConfig_getCompositorOffsetNanos(ADisplayConfig* config);
+ int64_t ADisplayConfig_getAppVsyncOffsetNanos(ADisplayConfig* config);
+ 
+ } // namespace android
+-// __END_DECLS
++// #ifdef __cplusplus
++}
++#endif
+diff --git a/libs/nativedisplay/include/surfacetexture/ImageConsumer.h b/libs/nativedisplay/include/surfacetexture/ImageConsumer.h
+index 35ae3d2144..5023c4dccd 100644
+--- a/libs/nativedisplay/include/surfacetexture/ImageConsumer.h
++++ b/libs/nativedisplay/include/surfacetexture/ImageConsumer.h
+@@ -21,7 +21,6 @@
+ #include <cutils/compiler.h>
+ #include <gui/BufferItem.h>
+ #include <gui/BufferQueueDefs.h>
+-#include <sys/cdefs.h>
+ #include <system/graphics.h>
+ 
+ namespace android {
+diff --git a/libs/nativedisplay/include/surfacetexture/SurfaceTexture.h b/libs/nativedisplay/include/surfacetexture/SurfaceTexture.h
+index 6eaa84e225..9a5a976f0c 100644
+--- a/libs/nativedisplay/include/surfacetexture/SurfaceTexture.h
++++ b/libs/nativedisplay/include/surfacetexture/SurfaceTexture.h
+@@ -20,7 +20,6 @@
+ #include <gui/BufferQueueDefs.h>
+ #include <gui/ConsumerBase.h>
+ #include <gui/IGraphicBufferProducer.h>
+-#include <sys/cdefs.h>
+ #include <system/graphics.h>
+ #include <ui/FenceTime.h>
+ #include <ui/GraphicBuffer.h>
+diff --git a/libs/nativewindow/include/android/data_space.h b/libs/nativewindow/include/android/data_space.h
+index e759513a63..a15dc9c37d 100644
+--- a/libs/nativewindow/include/android/data_space.h
++++ b/libs/nativewindow/include/android/data_space.h
+@@ -23,9 +23,10 @@
+ 
+ #include <inttypes.h>
+ 
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * ADataSpace.
+@@ -153,6 +154,8 @@ enum ADataSpace {
+     ADATASPACE_SRGB_LINEAR = 138477568, // STANDARD_BT709 | TRANSFER_LINEAR | RANGE_FULL
+ };
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_DATA_SPACE_H
+diff --git a/libs/nativewindow/include/android/hardware_buffer.h b/libs/nativewindow/include/android/hardware_buffer.h
+index dcb05b5536..f3ba02ac69 100644
+--- a/libs/nativewindow/include/android/hardware_buffer.h
++++ b/libs/nativewindow/include/android/hardware_buffer.h
+@@ -47,11 +47,12 @@
+ 
+ #include <inttypes.h>
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <android/rect.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * Buffer pixel formats.
+@@ -535,7 +536,9 @@ int AHardwareBuffer_lockAndGetInfo(AHardwareBuffer* buffer, uint64_t usage,
+         int32_t fence, const ARect* rect, void** outVirtualAddress,
+         int32_t* outBytesPerPixel, int32_t* outBytesPerStride) __INTRODUCED_IN(29);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_HARDWARE_BUFFER_H
+ 
+diff --git a/libs/nativewindow/include/android/hdr_metadata.h b/libs/nativewindow/include/android/hdr_metadata.h
+index 88772a92fc..07b48e9588 100644
+--- a/libs/nativewindow/include/android/hdr_metadata.h
++++ b/libs/nativewindow/include/android/hdr_metadata.h
+@@ -23,9 +23,10 @@
+ 
+ #include <inttypes.h>
+ 
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * These structures are used to define the display's capabilities for HDR content.
+@@ -69,6 +70,8 @@ struct AHdrMetadata_cta861_3 {
+     float maxFrameAverageLightLevel;
+ };
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // ANDROID_HDR_METADATA_H
+diff --git a/libs/nativewindow/include/android/native_window.h b/libs/nativewindow/include/android/native_window.h
+index a3a45e3705..834a68f3fa 100644
+--- a/libs/nativewindow/include/android/native_window.h
++++ b/libs/nativewindow/include/android/native_window.h
+@@ -34,7 +34,6 @@
+ #define ANDROID_NATIVE_WINDOW_H
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <android/data_space.h>
+ #include <android/hardware_buffer.h>
+diff --git a/libs/nativewindow/include/apex/window.h b/libs/nativewindow/include/apex/window.h
+index 2d1354cdf1..1b2f689406 100644
+--- a/libs/nativewindow/include/apex/window.h
++++ b/libs/nativewindow/include/apex/window.h
+@@ -22,7 +22,9 @@
+ // apex is a superset of the NDK
+ #include <android/native_window.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * perform bits that can be used with ANativeWindow_perform()
+@@ -207,4 +209,6 @@ int64_t ANativeWindow_getLastDequeueStartTime(ANativeWindow* window);
+  */
+ int ANativeWindow_setDequeueTimeout(ANativeWindow* window, int64_t timeout);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/nativewindow/include/system/window.h b/libs/nativewindow/include/system/window.h
+index 73b46b202e..8fdb9db16f 100644
+--- a/libs/nativewindow/include/system/window.h
++++ b/libs/nativewindow/include/system/window.h
+@@ -37,7 +37,6 @@
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
+ #include <system/graphics.h>
+ #include <unistd.h>
+ 
+@@ -53,7 +52,9 @@
+ #define __deprecated __attribute__((__deprecated__))
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*****************************************************************************/
+ 
+@@ -1123,4 +1124,6 @@ static inline int ANativeWindow_setQueryInterceptor(ANativeWindow* window,
+     return window->perform(window, NATIVE_WINDOW_SET_QUERY_INTERCEPTOR, interceptor, data);
+ }
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+diff --git a/libs/nativewindow/include/vndk/hardware_buffer.h b/libs/nativewindow/include/vndk/hardware_buffer.h
+index 12f8691684..d595b384ec 100644
+--- a/libs/nativewindow/include/vndk/hardware_buffer.h
++++ b/libs/nativewindow/include/vndk/hardware_buffer.h
+@@ -22,7 +22,9 @@
+ 
+ #include <cutils/native_handle.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ const native_handle_t* AHardwareBuffer_getNativeHandle(const AHardwareBuffer* buffer);
+ 
+@@ -95,6 +97,8 @@ enum {
+     AHARDWAREBUFFER_USAGE_CAMERA_MASK               = 6UL << 16,
+ };
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* ANDROID_VNDK_NATIVEWINDOW_AHARDWAREBUFFER_H */
+diff --git a/libs/nativewindow/include/vndk/window.h b/libs/nativewindow/include/vndk/window.h
+index 500052c936..db1fdd1571 100644
+--- a/libs/nativewindow/include/vndk/window.h
++++ b/libs/nativewindow/include/vndk/window.h
+@@ -23,7 +23,9 @@
+ #include <android/native_window.h>
+ 
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * Convert this ANativeWindowBuffer into a AHardwareBuffer
+@@ -328,6 +330,8 @@ int ANativeWindow_setAutoPrerotation(ANativeWindow* window, bool autoPrerotation
+ 
+ /*****************************************************************************/
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* ANDROID_VNDK_NATIVEWINDOW_ANATIVEWINDOW_H */
+diff --git a/libs/vr/libdvr/dvr_buffer_queue_internal.h b/libs/vr/libdvr/dvr_buffer_queue_internal.h
+index e53a6868ff..844526bed0 100644
+--- a/libs/vr/libdvr/dvr_buffer_queue_internal.h
++++ b/libs/vr/libdvr/dvr_buffer_queue_internal.h
+@@ -3,7 +3,6 @@
+ 
+ #include <gui/Surface.h>
+ #include <private/dvr/buffer_hub_queue_client.h>
+-#include <sys/cdefs.h>
+ 
+ #include <array>
+ #include <memory>
+diff --git a/libs/vr/libdvr/dvr_internal.h b/libs/vr/libdvr/dvr_internal.h
+index f845cd896d..489743d10a 100644
+--- a/libs/vr/libdvr/dvr_internal.h
++++ b/libs/vr/libdvr/dvr_internal.h
+@@ -1,7 +1,6 @@
+ #ifndef ANDROID_DVR_INTERNAL_H_
+ #define ANDROID_DVR_INTERNAL_H_
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <memory>
+ 
+diff --git a/libs/vr/libdvr/include/dvr/dvr_buffer.h b/libs/vr/libdvr/include/dvr/dvr_buffer.h
+index 4234844c0f..8a34822998 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_buffer.h
++++ b/libs/vr/libdvr/include/dvr/dvr_buffer.h
+@@ -3,10 +3,11 @@
+ 
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ #include <memory>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ typedef struct DvrWriteBuffer DvrWriteBuffer;
+ typedef struct DvrReadBuffer DvrReadBuffer;
+@@ -53,6 +54,8 @@ int dvrBufferGetAHardwareBuffer(DvrBuffer* buffer,
+ // Retrieve the shared buffer layout version defined in dvr_shared_buffers.h.
+ int dvrBufferGlobalLayoutVersionGet();
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_BUFFER_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_buffer_queue.h b/libs/vr/libdvr/include/dvr/dvr_buffer_queue.h
+index ac789daf3d..9acf66e4cd 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_buffer_queue.h
++++ b/libs/vr/libdvr/include/dvr/dvr_buffer_queue.h
+@@ -1,11 +1,12 @@
+ #ifndef ANDROID_DVR_BUFFER_QUEUE_H_
+ #define ANDROID_DVR_BUFFER_QUEUE_H_
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <dvr/dvr_buffer.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ typedef struct ANativeWindow ANativeWindow;
+ 
+@@ -258,6 +259,8 @@ int dvrReadBufferQueueSetBufferRemovedCallback(
+ // @return Zero on success, or negative error code.
+ int dvrReadBufferQueueHandleEvents(DvrReadBufferQueue* read_queue);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_BUFFER_QUEUE_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_config.h b/libs/vr/libdvr/include/dvr/dvr_config.h
+index 3d2c0668da..3b94f1b8f8 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_config.h
++++ b/libs/vr/libdvr/include/dvr/dvr_config.h
+@@ -4,9 +4,10 @@
+ // This header is shared by VrCore and Android and must be kept in sync.
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // This is a shared memory buffer for passing config data from VrCore to
+ // libvrflinger in SurfaceFlinger.
+@@ -29,6 +30,8 @@ struct __attribute__((packed, aligned(16))) DvrConfig {
+   uint8_t pad[8];
+ };
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_CONFIG_H
+diff --git a/libs/vr/libdvr/include/dvr/dvr_configuration_data.h b/libs/vr/libdvr/include/dvr/dvr_configuration_data.h
+index 22a509f6eb..efd148e243 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_configuration_data.h
++++ b/libs/vr/libdvr/include/dvr/dvr_configuration_data.h
+@@ -4,12 +4,13 @@
+ #include <stdbool.h>
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <dvr/dvr_display_types.h>
+ #include <dvr/dvr_surface.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Loads device configuration data of DVR_CONFIGURATION_DATA_*.
+ // @return 0 on success. Otherwise returns a negative error value.
+@@ -19,6 +20,8 @@ int dvrConfigurationDataGet(int config_type,
+ // Destroy the configuration data returned from dvrGetConfigurationData.
+ void dvrConfigurationDataDestroy(uint8_t* data);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // DVR_CONFIGURATION_DATA_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_deleter.h b/libs/vr/libdvr/include/dvr/dvr_deleter.h
+index fe59d1ffba..5a9d93cf2d 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_deleter.h
++++ b/libs/vr/libdvr/include/dvr/dvr_deleter.h
+@@ -1,13 +1,14 @@
+ #ifndef ANDROID_DVR_DELETER_H_
+ #define ANDROID_DVR_DELETER_H_
+ 
+-#include <sys/cdefs.h>
+ 
+ #include <memory>
+ 
+ // Header-only C++ helper to delete opaque DVR objects.
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Use forward declarations to avoid dependency on other headers.
+ typedef struct DvrBuffer DvrBuffer;
+@@ -32,7 +33,9 @@ void dvrSurfaceDestroy(DvrSurface* surface);
+ void dvrHwcClientDestroy(DvrHwcClient* client);
+ void dvrHwcFrameDestroy(DvrHwcFrame* frame);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ // Avoid errors if this header is included in C code.
+ #if defined(__cplusplus)
+diff --git a/libs/vr/libdvr/include/dvr/dvr_display_manager.h b/libs/vr/libdvr/include/dvr/dvr_display_manager.h
+index f910d610f5..29ba986d26 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_display_manager.h
++++ b/libs/vr/libdvr/include/dvr/dvr_display_manager.h
+@@ -4,12 +4,13 @@
+ #include <stdbool.h>
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <dvr/dvr_display_types.h>
+ #include <dvr/dvr_surface.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ typedef struct DvrBuffer DvrBuffer;
+ typedef struct DvrDisplayManager DvrDisplayManager;
+@@ -128,6 +129,8 @@ ssize_t dvrSurfaceStateGetAttributes(DvrSurfaceState* surface_state,
+                                      DvrSurfaceAttribute* attributes,
+                                      size_t max_count);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_DISPLAY_MANAGER_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_display_types.h b/libs/vr/libdvr/include/dvr/dvr_display_types.h
+index fd69843292..6e98383c38 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_display_types.h
++++ b/libs/vr/libdvr/include/dvr/dvr_display_types.h
+@@ -1,9 +1,10 @@
+ #ifndef ANDROID_DVR_DISPLAY_TYPES_H_
+ #define ANDROID_DVR_DISPLAY_TYPES_H_
+ 
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Define types used in pose buffer fields. These types have atomicity
+ // guarantees that are useful in lock-free shared memory ring buffers.
+@@ -60,6 +61,8 @@ enum {
+   DVR_SURFACE_ATTRIBUTE_FIRST_USER_KEY = 1,
+ };
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_DISPLAY_TYPES_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_performance.h b/libs/vr/libdvr/include/dvr/dvr_performance.h
+index 5df35ad9d9..540f00574e 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_performance.h
++++ b/libs/vr/libdvr/include/dvr/dvr_performance.h
+@@ -4,7 +4,9 @@
+ #include <stddef.h>
+ #include <unistd.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /// Sets the scheduler policy for a task.
+ ///
+@@ -20,7 +22,9 @@ __BEGIN_DECLS
+ /// @returns Returns 0 on success or a negative errno error code on error.
+ int dvrPerformanceSetSchedulerPolicy(pid_t task_id, const char* scheduler_policy);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_PERFORMANCE_H_
+ 
+diff --git a/libs/vr/libdvr/include/dvr/dvr_pose.h b/libs/vr/libdvr/include/dvr/dvr_pose.h
+index 87527515b4..51311709b1 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_pose.h
++++ b/libs/vr/libdvr/include/dvr/dvr_pose.h
+@@ -2,9 +2,10 @@
+ #define ANDROID_DVR_PUBLIC_POSE_H_
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #ifdef __ARM_NEON
+ #include <arm_neon.h>
+@@ -149,6 +150,8 @@ int dvrPoseClientGetDataReader(DvrPoseClient* client, uint64_t data_type,
+ 
+ // TODO(b/65067592): Move pose api's from pose_client.h to here.
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_PUBLIC_POSE_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_surface.h b/libs/vr/libdvr/include/dvr/dvr_surface.h
+index 74a68a16ee..0e615d2fe2 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_surface.h
++++ b/libs/vr/libdvr/include/dvr/dvr_surface.h
+@@ -4,14 +4,15 @@
+ #include <stdbool.h>
+ #include <stddef.h>
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <dvr/dvr_api.h>
+ #include <dvr/dvr_buffer.h>
+ #include <dvr/dvr_buffer_queue.h>
+ #include <dvr/dvr_display_types.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Attribute types. The values are one-hot encoded to support singluar types or
+ // masks of supported types.
+@@ -108,6 +109,8 @@ int dvrGetGlobalBuffer(DvrGlobalBufferKey key, DvrBuffer** out_buffer);
+ int dvrGetNativeDisplayMetrics(size_t metrics_struct_size,
+                                DvrNativeDisplayMetrics* metrics);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_SURFACE_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_tracking.h b/libs/vr/libdvr/include/dvr/dvr_tracking.h
+index 5e388f391a..bb4be60da3 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_tracking.h
++++ b/libs/vr/libdvr/include/dvr/dvr_tracking.h
+@@ -2,11 +2,12 @@
+ #define ANDROID_DVR_TRACKING_H_
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+ #include <dvr/dvr_tracking_types.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ typedef struct DvrReadBuffer DvrReadBuffer;
+ typedef struct DvrTrackingCamera DvrTrackingCamera;
+@@ -180,6 +181,8 @@ int dvrTrackingFeatureExtractorProcessBuffer(
+     DvrTrackingFeatureExtractor* extractor, DvrReadBuffer* buffer,
+     const DvrTrackingBufferMetadata* metadata, bool* out_skipped);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_TRACKING_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_tracking_types.h b/libs/vr/libdvr/include/dvr/dvr_tracking_types.h
+index 81310d2303..8ee27bdf68 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_tracking_types.h
++++ b/libs/vr/libdvr/include/dvr/dvr_tracking_types.h
+@@ -2,9 +2,10 @@
+ #define ANDROID_DVR_TRACKING_TYPES_H_
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ typedef struct DvrTrackingBufferMetadata {
+   // Specifies the source of this image.
+@@ -99,6 +100,8 @@ typedef struct DvrTrackingSensorEvent {
+   float z;
+ } DvrTrackingSensorEvent;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_TRACKING_TYPES_H_
+diff --git a/libs/vr/libdvr/include/dvr/dvr_vsync.h b/libs/vr/libdvr/include/dvr/dvr_vsync.h
+index 498bb5cc6e..cd1a3f959c 100644
+--- a/libs/vr/libdvr/include/dvr/dvr_vsync.h
++++ b/libs/vr/libdvr/include/dvr/dvr_vsync.h
+@@ -2,9 +2,10 @@
+ #define ANDROID_DVR_VSYNC_H_
+ 
+ #include <stdint.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ // Represents a vsync sample. The size of this struct is 32 bytes.
+ typedef struct __attribute__((packed, aligned(16))) DvrVsync {
+@@ -27,6 +28,8 @@ typedef struct __attribute__((packed, aligned(16))) DvrVsync {
+   uint8_t padding[8];
+ } DvrVsync;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_DVR_VSYNC_H_
+diff --git a/vulkan/include/hardware/hwvulkan.h b/vulkan/include/hardware/hwvulkan.h
+index 9e9a14d489..8c1eb5a515 100644
+--- a/vulkan/include/hardware/hwvulkan.h
++++ b/vulkan/include/hardware/hwvulkan.h
+@@ -20,7 +20,9 @@
+ #include <hardware/hardware.h>
+ #include <vulkan/vulkan.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #define HWVULKAN_HARDWARE_MODULE_ID "vulkan"
+ 
+@@ -66,6 +68,8 @@ typedef struct hwvulkan_device_t {
+     PFN_vkGetInstanceProcAddr GetInstanceProcAddr;
+ } hwvulkan_device_t;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif  // ANDROID_HWVULKAN_H

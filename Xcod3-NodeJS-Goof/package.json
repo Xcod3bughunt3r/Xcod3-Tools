@@ -1,0 +1,57 @@
+{
+  "name": "goof",
+  "version": "1.0.1",
+  "description": "A vulnerable todo demo application",
+  "homepage": "https://snyk.io/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Snyk/snyk-todo-list-demo-app/"
+  },
+  "scripts": {
+    "dev": "nodemon ./app.js",
+    "start": "node app.js",
+    "build": "browserify -r jquery > public/js/bundle.js",
+    "cleanup": "mongo express-todo --eval 'db.todos.remove({});'",
+    "test": "snyk test"
+  },
+  "dependencies": {
+    "adm-zip": "0.5.2",
+    "body-parser": "1.17.1",
+    "cfenv": "^1.2.4",
+    "consolidate": "0.14.5",
+    "dustjs-helpers": "1.5.0",
+    "dustjs-linkedin": "3.0.0",
+    "ejs": "3.1.6",
+    "ejs-locals": "1.0.2",
+    "errorhandler": "1.4.3",
+    "express": "4.16.0",
+    "express-fileupload": "1.1.10",
+    "express-session": "^1.17.2",
+    "file-type": "^8.1.0",
+    "hbs": "^4.1.2",
+    "humanize-ms": "1.0.1",
+    "jquery": "^3.5.0",
+    "lodash": "4.17.21",
+    "marked": "1.1.1",
+    "method-override": "latest",
+    "moment": "2.19.3",
+    "mongodb": "^3.5.9",
+    "mongoose": "5.13.9",
+    "morgan": "latest",
+    "ms": "^2.0.0",
+    "mysql": "^2.18.1",
+    "npmconf": "2.1.3",
+    "optional": "^0.1.3",
+    "st": "1.2.2",
+    "stream-buffers": "^3.0.1",
+    "tap": "^15.0.0",
+    "typeorm": "^0.2.27",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.1",
+    "nodemon": "^2.0.7",
+    "snyk": "^1.244.0"
+  },
+  "license": "MIT"
+}

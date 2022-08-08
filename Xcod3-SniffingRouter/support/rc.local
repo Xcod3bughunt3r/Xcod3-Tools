@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+sudo sysctl -w net.ipv4.ip_forward=1
+
+sudo iptables -P FORWARD ACCEPT
+
+sudo iptables --table nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+exit 0

