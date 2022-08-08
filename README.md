@@ -50,7 +50,7 @@
     - [Pentest-Pivoting](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/blob/main/MDocs/Pentest-Pivoting.md)
     - [TP-Links Linux](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/blob/main/MDocs/TP-Links.md)
     - [Ubuntu WSL2g](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/blob/main/MDocs/WSLg2.md)
-    - [My Workshops](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/blob/main/MDocs/Xcod3bughunt3r.md)
+    - [LEARN BASIC WEBSITE HACKING](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r/blob/main/MDocs/Xcod3bughunt3r.md)
 
 #### ``Please Check`` *[LICENSE](LICENSE)*
 #### ``DEVELOPERS:``*[Xcod3bughunt3r](https://github.com/Xcod3bughunt3r/Xcod3bughunt3r)*
