@@ -3,10 +3,10 @@
 ## ``30 TOOLS THAT I MODIFIED & MADE THEMSELVES....``
 ### ``My Xcod3 Tools Indonesia....``
 * Tools For You....
-  * 01 *[AFXcod3](https://github.com/Xcod3bughunt3r/Xcod3-Tools/AFXcod3)*
-  * 02 *[Xcod3-AnTools](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-AnTools)*
-  * 03 *[Xcod3-log4j-Minecraft](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-log4j-Minecraft)*
-  * 04 *[Xcod3-NetSec](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-NetSec)*
+  * 01 *[AFXcod3](https://github.com/Xcod3bughunt3r/Xcod3-Tools/tree/main/AFXcod3)*
+  * 02 *[Xcod3-AnTools](https://github.com/Xcod3bughunt3r/Xcod3-Tools/tree/main/Xcod3-AnTools)*
+  * 03 *[Xcod3-log4j-Minecraft](https://github.com/Xcod3bughunt3r/Xcod3-Tools/tree/main/Xcod3-log4j-Minecraft)*
+  * 04 *[Xcod3-NetSec](https://github.com/Xcod3bughunt3r/Xcod3-Tools/tree/main/Xcod3-NetSec)*
   * 05 *[Xcod3-NodeJS-Goof](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-NodeJS-Goof)*
   * 06 *[Xcod3-AntiAdmin](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-AntiAdmin)*
   * 07 *[Xcod3-BackdoorUpload](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-BackdoorUpload)*
