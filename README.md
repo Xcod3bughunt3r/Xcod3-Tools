@@ -17,7 +17,7 @@
   * 12 *[Xcod3-ExploitSamiFTPListWinServer](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-ExploitSamiFTPListWinServer)*
   * 13 *[Xcod3-FTPFuzzer](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-FTPFuzzer)*
   * 14 *[Xcod3-HTTPFuzzer](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-HTTPFuzzer)*
-  * 15 *[Xcod3-Metagoofil](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-Metagoofil)*
+  * 15 *[Xcod3-Metagoofil Deleted](Deleted)*
   * 16 *[Xcod3-PayloadBadUSBSuper](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-PayloadBadUSBSuper)*
   * 17 *[Xcod3-PHPFileManager](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-PHPFileManager)*
   * 18 *[Xcod3-PHPShell](https://github.com/Xcod3bughunt3r/Xcod3-Tools/Xcod3-PHPShell)*
